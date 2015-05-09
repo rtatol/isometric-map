@@ -1,0 +1,29 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>Isometric Map</title>
+        <link rel="stylesheet" href="css/main.css" type="text/css"/>
+    </head>
+    <body>
+        <!-- main canvas -->
+        <canvas id="canvas"/>
+        <!-- initial code -->
+        <script type="text/javascript" src="js/isomap.js"></script>
+        <script type="text/javascript">
+            (function() {
+
+                // isometric map settings
+                var params = {
+                    screen: { width: 1024, height: 768 },
+                    map: { width: 14, height: 14 },
+                    tile: { width: 64, height: 32 }
+                }
+
+                // create map
+                var isoMap = new IsoMap(params);
+                isoMap.create();
+
+            })();
+        </script>
+    </body>
+</html>
