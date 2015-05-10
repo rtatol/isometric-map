@@ -17,12 +17,6 @@ IsoMap = (function() {
             height: params.screen.height
          };
 
-        // initial position of isometric map
-        this.position = {
-            x: this.screen.width / 2,
-            y: 0
-        }
-
         // size of isometric map
         this.map = {
             width: params.map.width,
@@ -33,6 +27,12 @@ IsoMap = (function() {
         this.tile = {
             width: params.tile.width,
             height: params.tile.height
+        }
+
+        // initial position of isometric map
+        this.position = {
+            x: this.screen.width / 2,
+            y: this.tile.height
         }
     }
 
@@ -49,11 +49,14 @@ IsoMap = (function() {
             for (j = 0; j < this.map.height; j++) {
                 // calculate coordinates
                 var x = (i-j) * this.tile.width / 2 + this.position.x;
-                var y = (i+j) * this.tile.height / 2;
+                var y = (i+j) * this.tile.height / 2 + this.position.y;
                 // draw single tile
                 this.drawTile(x, y);
             }
         }
+
+        // add event listeners
+        this.addListeners();
     };
 
     /**
@@ -92,6 +95,107 @@ IsoMap = (function() {
         this.context.fillStyle = this.color;
         this.context.fill();   
     }
+
+    /**
+     * @desc draw single shape - prism
+     * @param object $isometricPosition - position on map { x: value, y: value }
+     */
+    IsoMap.prototype.drawPrism = function(isometricPosition) {
+        var screenPosition = this.convertIsometricToScreen(isometricPosition.x, isometricPosition.y);
+        var x = screenPosition.x;
+        var y = screenPosition.y;
+        var tileWidth = this.tile.width;
+        var tileHeight = this.tile.height;
+
+        // top
+        this.context.beginPath();
+
+        this.context.moveTo(x - tileWidth / 2, y - tileHeight);
+        this.context.lineTo(x - tileWidth, y - tileHeight / 2);
+        this.context.lineTo(x - tileWidth / 2, y);
+        this.context.lineTo(x, y - tileHeight / 2);
+        this.context.lineTo(x - tileWidth / 2,  y - tileHeight);
+
+        this.context.fillStyle = '#555555';
+        this.context.fill();
+
+        // left
+        this.context.beginPath();
+
+        this.context.moveTo(x - tileWidth, y - tileHeight / 2);
+        this.context.lineTo(x - tileWidth, y + tileHeight / 2);
+        this.context.lineTo(x - tileWidth / 2, y + tileHeight);
+        this.context.lineTo(x - tileWidth / 2, y);
+        this.context.lineTo(x - tileWidth, y - tileHeight / 2);
+
+        this.context.fillStyle = '#444444';
+        this.context.fill();
+
+        // right
+        this.context.beginPath();
+
+        this.context.moveTo(x - tileWidth / 2, y);
+        this.context.lineTo(x, y - tileHeight / 2);
+        this.context.lineTo(x, y + tileHeight / 2);
+        this.context.lineTo(x - tileWidth / 2, y + tileHeight);
+        this.context.lineTo(x - tileWidth / 2, y);
+
+        this.context.fillStyle = '#777777';
+        this.context.fill();
+    }
+
+    /**
+     * @desc init map listeners
+     */
+    IsoMap.prototype.addListeners = function() {
+        var self = this;
+
+        this.canvas.addEventListener('mousedown', function onMouseDown(event) {
+            var mousePosition = getMousePosition(event);
+            var isometricPosition = self.convertScreenToIsometric(mousePosition.x, mousePosition.y);
+
+            if (isOnMap(isometricPosition, self.map)) {
+                self.drawPrism(isometricPosition);
+            }
+        }, false);
+
+    }
+
+    IsoMap.prototype.convertScreenToIsometric = function(x, y) {
+        x = (x - this.position.x) / this.tile.width;
+        y = (y - this.position.y) / this.tile.height;
+
+        var isoX = Math.floor(y + x) 
+        var isoY = Math.floor(y - x) 
+
+       return { x: isoX, y: isoY };
+    };
+
+    IsoMap.prototype.convertIsometricToScreen = function(x, y) {
+        var screenX = ( (x-y) * this.tile.width / 2 ) + this.position.x;
+        var screenY = ( (x+y) * this.tile.height / 2 ) + this.position.y;
+
+        return { x: screenX, y: screenY};
+    };
+
+    function getMousePosition(event) {
+        var canvas = event.target;
+        var rect = canvas.getBoundingClientRect();
+
+        return {
+          x: event.clientX - rect.left,
+          y: event.clientY - rect.top
+        };
+    };
+
+    function isOnMap(position, map) {
+        if (position.x >= 0 && position.x < map.width 
+            && position.y >= 0 && position.y < map.height) {
+                return true;
+        } else {
+            return false;
+        }
+    };
 
     return IsoMap;
 })();

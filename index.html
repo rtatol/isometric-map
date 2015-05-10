@@ -6,7 +6,7 @@
     </head>
     <body>
         <!-- main canvas -->
-        <canvas id="canvas"/>
+        <canvas id="canvas" class="center"/>
         <!-- initial code -->
         <script type="text/javascript" src="js/isomap.js"></script>
         <script type="text/javascript">
@@ -22,6 +22,10 @@
                 // create map
                 var isoMap = new IsoMap(params);
                 isoMap.create();
+
+                // draw shape
+                isoMap.drawPrism({ x: 5, y: 6});
+                isoMap.drawPrism({ x: 8, y: 7});
 
             })();
         </script>
